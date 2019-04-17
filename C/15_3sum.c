@@ -1,19 +1,4 @@
-#include<stdio.h>
-#include<stdlib.h>
-
-int partition(int*, int, int);
-void quicksort(int*, int, int);
-int** threeSum(int*, int, int*);
-
-
-int main(){
-    int a[7] = {-5,4,1,3,2,-6,11};    
-    int* returnSize = (int*)malloc(sizeof(int));
-    threeSum(a ,7 ,returnSize);
-    getchar();
-    return 0;
-}
-
+************************************************************************Original Solution**************************************************************************************
 
 //找到target所在的index
 int find(int* nums, int start, int end, int target){
@@ -76,8 +61,6 @@ int** threeSum(int* nums, int numsSize, int* returnSize){
 }
 
 
-
-
 int partition(int* nums, int low, int high){
     int pivotkey = nums[low];
     while(low < high){
@@ -99,3 +82,104 @@ void quicksort(int* nums, int low, int high){
         quicksort(nums, pivotkey +1, high);
     }
 }
+
+
+*******************************************************************************************************************************************************************************
+******************************************************************* Improved Solution *****************************************************************************************
+
+
+int cmp(const void* arg1, const void* arg2){
+    return *(int*)arg1 - *(int*)arg2;
+}
+
+int** addSolution(int a, int b, int c, int** result, int* returnSize){
+    if(*returnSize % 100 == 0)
+        result = (int**)realloc(result, sizeof(int*) * (*returnSize + 100));
+    int* solution = (int*)malloc(sizeof(int)*3);
+    solution[0] = a;
+    solution[1] = b;
+    solution[2] = c;
+    result[(*returnSize)++] = solution;
+    return result;
+}
+
+
+//这个解法参考于 https://leetcode.com/problems/3sum/discuss/7523/26ms-C-solution
+int** threeSum(int* nums, int numsSize, int* returnSize){
+    *returnSize = 0;
+    int i , j, k;
+    int nc = 0, pc = 0, zc = 0;//negativecount;positivecount;zerocount
+
+    //申请空间，每次申请100个
+    int** result = (int**)malloc(sizeof(int*) * 100);
+
+
+    if(numsSize < 3)
+        return result;
+
+    //排序后求出nc pc 和 zc
+    qsort(nums, numsSize, sizeof(int), cmp);
+    for(i = 0; i < numsSize; i++){
+        if(nums[i] < 0)
+            nc++;
+        else if(nums[i] == 0)
+            zc++;
+        else
+            break;
+    }
+    pc = numsSize - nc - zc;
+
+    //解中有3个0的
+    if(zc >= 3)
+        result = addSolution(0, 0, 0, result, returnSize);
+
+    //解中有1个零
+    //那么另外两个数就必须异号，从而只需要从nums的两端进行遍历即可
+    if(zc >= 1){
+        for(i = 0,j = numsSize - 1 ;i < nc && j > numsSize -1 - pc;){
+            if(nums[i] + nums[j] < 0) i++;
+            else if(nums[i] + nums[j] > 0) j--;
+            else if(i > 0 && nums[i] == nums[i-1]) i++;             //跳过重复元素
+            else if(j < numsSize -1 && nums[j] == nums[j+1]) j--;   //跳过重复元素
+            else result = addSolution(nums[i++], 0, nums[j--],result,returnSize);
+        }
+    }
+
+    //解中有两个负数
+    if(nc >= 2 && pc >=1){
+        for(i = 0; i < nc - 1; i++){
+            if(nums[i] + nums[numsSize -1] < 0);
+            else if(i > 0 && nums[i] == nums[i -1]);
+            else
+                for(k = i + 1, j = numsSize -1; k < nc && j > numsSize - 1 - pc;){
+                    if(nums[i] + nums[j] + nums[k] < 0) k++; 
+                    else if(nums[i] + nums[j] + nums[k] > 0) j--;
+                    else if(k > i +1 && nums[k] == nums[k -1]) k++;     //跳过重复元素
+                    else if(j < numsSize -1 && nums[j] == nums[j+1]) j--;//跳过重复元素
+                    else result = addSolution(nums[i],nums[k++],nums[j--],result,returnSize);
+                }
+        }
+    }
+
+    //解中有两个正数
+    if(pc >= 2 && nc >= 1){
+        for(i = numsSize -1; i > numsSize -2 - pc; i--){
+            if(nums[i] + nums[0] > 0);
+            else if(i < numsSize -1 && nums[i] == nums[i+1]);
+            else
+                for(j = 0, k = i -1; j < nc && k > numsSize - 1 - pc;){
+                    if(nums[i] + nums[j] + nums[k] < 0) j++;
+                    else if(nums[i] + nums[j] + nums[k] > 0) k--;
+                    else if(j > 0 && nums[j] == nums[j-1]) j++;
+                    else if(k < i -1 && nums[k] == nums[k+1]) k--;
+                    else result = addSolution(nums[i], nums[j++], nums[k--],result,returnSize);
+
+                }
+        }
+    }
+
+    return result;
+}
+
+
+
