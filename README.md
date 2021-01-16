@@ -1,3 +1,3 @@
 ###### Leetcode-solution
 
-Solutions to leetcode problems written in c and maybe java sometimes.
+Solutions to leetcode problems written in c, well maybe java sometimes.
