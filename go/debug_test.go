@@ -352,3 +352,9 @@ func Test2976(t *testing.T) {
 func Test97(t *testing.T) {
 	isInterleave("aabcc", "dbbca", "aadbbcbcac")
 }
+
+func Test198(t *testing.T) {
+	houses := []int{2, 7, 9, 3, 1}
+	amount := rob_198(houses)
+	log.Println(amount)
+}
